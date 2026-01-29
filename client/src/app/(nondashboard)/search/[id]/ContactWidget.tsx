@@ -9,7 +9,7 @@ const ContactWidget = ({ onOpenModal }: ContactWidgetProps) => {
   const router = useRouter();
   const params = useParams();
   const propertyId = Number(params.id);
-  const { data: property } = useGetPropertyQuery(propertyId);
+  const { data: property } = useGetPropertyQuery({ id: propertyId });
   const [createConversation, { isLoading: isCreatingConversation }] = useGetOrCreateConversationMutation();
   const [isStartingChat, setIsStartingChat] = useState(false);
 

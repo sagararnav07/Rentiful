@@ -18,7 +18,7 @@ import {
   useGetPropertyQuery,
   useDeletePropertyMutation,
 } from "@/state/api";
-import { ArrowLeft, Check, Trash2, XCircle, Building2 } from "lucide-react";
+import { ArrowLeft, Check, Trash2, XCircle, Building2, ArrowDownToLine } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";

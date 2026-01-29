@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### Push this app to GitHub (real-estate-frontend)
+
+From the **client** folder, run:
+
+```bash
+./push-to-github.sh
+```
+
+Or manually:
+
+```bash
+cd client
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/sagararnav07/real-estate-frontend.git
+git push -u origin main
+```
+
+### Auto-deploy on push
+
+1. Go to [Vercel](https://vercel.com) → **Add New** → **Project**.
+2. **Import** the repo: `sagararnav07/real-estate-frontend`.
+3. Leave **Root Directory** as `.` (this repo is the frontend root).
+4. Deploy. After that, every push to `main` will trigger a new deployment.

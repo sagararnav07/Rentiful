@@ -120,98 +120,97 @@ const Applications = () => {
                 </p>
               </div>
             ) : (
-              filteredApplications
-                .filter(
-                  (application) =>
-                    tab === "all" || application.status.toLowerCase() === tab
-                )
-                .map((application) => (
-                  <ApplicationCard
-                    key={application.id}
-                    application={application}
-                    userType="manager"
-                  >
-                    <div className="flex flex-col lg:flex-row justify-between gap-3 w-full pb-4 px-4">
-                      {/* Status Section */}
-                      <div
-                        className={`p-4 grow rounded-md flex flex-wrap items-center gap-2 ${
-                          application.status === "Approved"
-                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                            : application.status === "Denied"
-                            ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                            : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
-                        }`}
-                      >
-                        <File className="w-5 h-5 flex-shrink-0" />
-                        <span>Submitted {formatDate(application.applicationDate)}</span>
-                        <span className="mx-2">•</span>
-                        <CircleCheckBig className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-semibold">
-                          {application.status === "Approved" && "Approved"}
-                          {application.status === "Denied" && "Denied"}
-                          {application.status === "Pending" && "Pending Review"}
-                        </span>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap gap-2">
-                        <Link
-                          href={`/managers/properties/${application.property.id}`}
-                          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 
-                            text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md flex items-center 
-                            justify-center hover:bg-primary-700 hover:text-primary-50 transition-colors"
-                          scroll={false}
+              <>
+                {filteredApplications
+                  .filter(
+                    (application) =>
+                      tab === "all" || application.status.toLowerCase() === tab
+                  )
+                  .map((application) => (
+                    <ApplicationCard
+                      key={application.id}
+                      application={application}
+                      userType="manager"
+                    >
+                      <div className="flex flex-col lg:flex-row justify-between gap-3 w-full pb-4 px-4">
+                        {/* Status Section */}
+                        <div
+                          className={`p-4 grow rounded-md flex flex-wrap items-center gap-2 ${
+                            application.status === "Approved"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                              : application.status === "Denied"
+                              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                              : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                          }`}
                         >
-                          <Building2 className="w-5 h-5 mr-2" />
-                          Property
-                        </Link>
-                        {application.status === "Approved" && (
-                          <button
+                          <File className="w-5 h-5 flex-shrink-0" />
+                          <span>Submitted {formatDate(application.applicationDate)}</span>
+                          <span className="mx-2">•</span>
+                          <CircleCheckBig className="w-5 h-5 flex-shrink-0" />
+                          <span className="font-semibold">
+                            {application.status === "Approved" && "Approved"}
+                            {application.status === "Denied" && "Denied"}
+                            {application.status === "Pending" && "Pending Review"}
+                          </span>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            href={`/managers/properties/${application.property.id}`}
                             className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 
                               text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md flex items-center 
                               justify-center hover:bg-primary-700 hover:text-primary-50 transition-colors"
-                            aria-label="Download lease agreement"
+                            scroll={false}
                           >
-                            <Download className="w-5 h-5 mr-2" />
-                            Agreement
-                          </button>
-                        )}
-                        {application.status === "Pending" && (
-                          <>
+                            <Building2 className="w-5 h-5 mr-2" />
+                            Property
+                          </Link>
+                          {application.status === "Approved" && (
                             <button
-                              className="px-4 py-2 text-sm text-white bg-green-600 rounded-md 
-                                hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              onClick={() => handleStatusChange(application.id, "Approved")}
-                              disabled={processingId === application.id}
+                              className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 
+                                text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md flex items-center 
+                                justify-center hover:bg-primary-700 hover:text-primary-50 transition-colors"
+                              aria-label="Download lease agreement"
                             >
-                              {processingId === application.id ? "Processing..." : "Approve"}
+                              <Download className="w-5 h-5 mr-2" />
+                              Agreement
                             </button>
+                          )}
+                          {application.status === "Pending" && (
+                            <>
+                              <button
+                                className="px-4 py-2 text-sm text-white bg-green-600 rounded-md 
+                                  hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                onClick={() => handleStatusChange(application.id, "Approved")}
+                                disabled={processingId === application.id}
+                              >
+                                {processingId === application.id ? "Processing..." : "Approve"}
+                              </button>
+                              <button
+                                className="px-4 py-2 text-sm text-white bg-red-600 rounded-md 
+                                  hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                onClick={() => handleStatusChange(application.id, "Denied")}
+                                disabled={processingId === application.id}
+                              >
+                                Deny
+                              </button>
+                            </>
+                          )}
+                          {application.status === "Denied" && (
                             <button
-                              className="px-4 py-2 text-sm text-white bg-red-600 rounded-md 
-                                hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              onClick={() => handleStatusChange(application.id, "Denied")}
-                              disabled={processingId === application.id}
+                              className={`bg-gray-800 text-white py-2 px-4 rounded-md flex items-center
+                              justify-center hover:bg-secondary-500 hover:text-primary-50`}
                             >
-                              Deny
+                              Contact User
                             </button>
-                            }
-                          >
-                            Deny
-                          </button>
-                        </>
-                      )}
-                      {application.status === "Denied" && (
-                        <button
-                          className={`bg-gray-800 text-white py-2 px-4 rounded-md flex items-center
-                          justify-center hover:bg-secondary-500 hover:text-primary-50`}
-                        >
-                          Contact User
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </ApplicationCard>
-              ))}
+                          )}
+                        </div>
+                      </div>
+                    </ApplicationCard>
+                  ))}
+              </>
+            )}
           </TabsContent>
         ))}
       </Tabs>

@@ -51,7 +51,7 @@ const SingleListing = () => {
 
   // Get property images or use placeholder
   const propertyImages = property?.photoUrls?.length 
-    ? property.photoUrls.map(url => getImageUrl(url))
+    ? property.photoUrls.map((url: string) => getImageUrl(url))
     : ["/singlelisting-2.jpg", "/singlelisting-3.jpg"];
 
   return (

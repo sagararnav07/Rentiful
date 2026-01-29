@@ -233,7 +233,7 @@ const Residence = () => {
     data: property,
     isLoading: propertyLoading,
     error: propertyError,
-  } = useGetPropertyQuery(Number(id));
+  } = useGetPropertyQuery({ id: Number(id) });
 
   const { data: leases, isLoading: leasesLoading } = useGetLeasesQuery(
     parseInt(authUser?.cognitoInfo?.userId || "0"),
