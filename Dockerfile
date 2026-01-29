@@ -1,22 +1,19 @@
-# Backend API - builds server/ from repo root (no Root Directory setting needed on Railway).
-# Railway auto-uses this Dockerfile when building from the repo.
-FROM node:20-slim
+FROM node:18-bullseye
 
 WORKDIR /app
 
-# Copy server package files
-COPY server/package.json server/package-lock.json ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy Prisma and generate client
-COPY server/prisma ./prisma/
+# 🔥 FORCE clean old prisma binaries
+RUN rm -rf node_modules/.prisma
+
+COPY prisma ./prisma
 RUN npx prisma generate
 
-# Copy server source and config
-COPY server/tsconfig.json ./
-COPY server/src ./src
+COPY tsconfig.json ./
+COPY src ./src
 
-# Build
 RUN npm run build
 
 RUN mkdir -p uploads/properties
