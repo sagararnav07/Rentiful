@@ -1,9 +1,13 @@
-# Backend API - use when Railway service Root Directory is set to "server"
+# Backend API
 FROM node:20-slim
+
+# ✅ Install OpenSSL (CRITICAL)
+RUN apt-get update && apt-get install -y openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy package files and install dependencies (including devDependencies for build)
+# Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -11,14 +15,14 @@ RUN npm ci
 COPY prisma ./prisma/
 RUN npx prisma generate
 
-# Copy source and config
+# Copy source
 COPY tsconfig.json ./
 COPY src ./src
 
 # Build TypeScript
 RUN npm run build
 
-# Create uploads dir so the app can write property images at runtime
+# Runtime dirs
 RUN mkdir -p uploads/properties
 
 EXPOSE 3002
