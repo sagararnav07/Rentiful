@@ -40,6 +40,7 @@ const allowedOrigins = [
   "http://localhost:3001",
   "http://127.0.0.1:3001",
   "https://rentiful-82zizwbjp-arnav-sagars-projects.vercel.app",
+  "https://rentiful-three.vercel.app/",
   process.env.CLIENT_URL
   
 ].filter(Boolean) as string[];
