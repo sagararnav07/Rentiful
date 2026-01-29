@@ -5,6 +5,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# 🔥 FORCE clean old prisma binaries
+RUN rm -rf node_modules/.prisma
+
 COPY prisma ./prisma
 RUN npx prisma generate
 
