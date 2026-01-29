@@ -39,7 +39,9 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
   "http://localhost:3001",
   "http://127.0.0.1:3001",
-  process.env.CLIENT_URL,
+  "https://rentiful-82zizwbjp-arnav-sagars-projects.vercel.app",
+  process.env.CLIENT_URL
+  
 ].filter(Boolean) as string[];
 
 // Socket.IO setup with CORS
