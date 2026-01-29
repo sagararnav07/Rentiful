@@ -24,4 +24,3 @@ RUN mkdir -p uploads/properties
 EXPOSE 3002
 CMD ["npm", "start"]
 
-CMD npx prisma migrate deploy && npm start
