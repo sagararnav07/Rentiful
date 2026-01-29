@@ -1,0 +1,16 @@
+# Only server/ is needed for the backend Dockerfile; ignore the rest to keep context small.
+.git
+.gitignore
+*.md
+.DS_Store
+.env
+.env.*
+
+# Client (not needed for backend image)
+client
+
+# Server dev/build artifacts (we run npm ci and build in the image)
+server/node_modules
+server/dist
+server/.env
+server/.env.*

@@ -83,9 +83,35 @@ Below, **Railway** is the main example. Steps for **Render** are summarized afte
 ### 3.1 Create project and connect repo
 
 1. Go to [railway.app](https://railway.app) and sign in (e.g. GitHub).
-2. **New Project** → **Deploy from GitHub repo**.
+2. **New Project** → **Deploy from GitHub repo** (or **Empty project** – see note below).
 3. Select the **Rentiful** repo (or the repo that contains the `server` folder).
-4. When asked for the root directory, set **Root Directory** to **`server`** (so the project root is the backend).
+4. Set **Root Directory** to **`server`** (see **Where to set Root Directory** below).
+
+#### Where to set Root Directory (Railway UI)
+
+Railway’s Root Directory is in **the service’s Settings**. If you don’t see it:
+
+1. **Click your backend service** on the project canvas (the box that represents the app).
+2. Open the **Settings** tab (top of the service panel, next to Variables / Deployments).
+3. **Scroll down** – look for:
+   - A **“Source”** section, or  
+   - A **“Build”** section, or  
+   - A field labeled **“Root Directory”** / **“Root directory”**.
+4. Set the value to **`server`** (no leading slash). Save (e.g. **Deploy** or **Save**).
+
+**If you still don’t see it:**
+
+- **Newer UI:** Sometimes it’s under **Settings → Source → Repo** (e.g. “Branch” and “Root Directory” together).
+- **Alternative flow (monorepo tutorial):** Create an **Empty project** → **+ Create** → **Empty service** → open that service → **Settings** → set **Root Directory** to **`server`** first → then in **Settings** connect the GitHub repo. That way Root Directory is visible before connecting the repo.
+
+**Docs:** [Deploying a Monorepo](https://docs.railway.com/tutorials/deploying-a-monorepo) (step 4: “Open the Backend service to its service settings and you will see a **Root Directory** option”).  
+**Build config:** [Build Configuration](https://docs.railway.com/guides/build-configuration#set-the-root-directory) – “Set the Root Directory”.
+
+**Important:** If you set Root Directory to `server`, tell Railway to use the config file at **`/server/railway.toml`** if it asks for a “Config file path” or “Railway config file” (path from repo root).
+
+**Fix for “npm: command not found”:** The build was using the repo root with no Node. A root **`Dockerfile`** and **`.dockerignore`** were added so Railway builds with Docker and Node. Commit and push, then redeploy.
+
+**No Root Directory?** Use the **root `Dockerfile`** instead: the repo has a **`Dockerfile` at the repo root** that builds only `server/`. Railway will use it automatically. You don’t need Root Directory—just connect the repo and deploy.
 
 ### 3.2 Set environment variables
 
