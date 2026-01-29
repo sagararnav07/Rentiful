@@ -7,11 +7,13 @@ import path from "path";
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import rateLimit from "express-rate-limit";
+
 import { authMiddleware } from "./middleware/authMiddleware";
 import { errorHandler } from "./lib/errorHandler";
 import { sanitizeInput } from "./lib/validation";
 import prisma from "./lib/prisma";
-/* ROUTE IMPORT */
+
+/* ROUTES */
 import tenantRoutes from "./routes/tenantRoutes";
 import managerRoutes from "./routes/managerRoutes";
 import propertyRoutes from "./routes/propertyRoutes";
@@ -21,182 +23,167 @@ import authRoutes from "./routes/authRoutes";
 import messageRoutes from "./routes/messageRoutes";
 import { setupSocketIO } from "./socket";
 
-/* CONFIGURATIONS */
 dotenv.config();
 
-// Validate required environment variables
+/* REQUIRED ENV CHECK */
 if (!process.env.JWT_SECRET) {
-  console.error("FATAL: JWT_SECRET environment variable is not set");
+  console.error("FATAL: JWT_SECRET is not set");
   process.exit(1);
 }
 
 const app = express();
 const server = http.createServer(app);
 
-// Allowed origins for CORS
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "http://localhost:3001",
-  "http://127.0.0.1:3001",
-  "https://rentiful-82zizwbjp-arnav-sagars-projects.vercel.app",
-  "https://rentiful-three.vercel.app/",
-  process.env.CLIENT_URL
-  
-].filter(Boolean) as string[];
+/* ✅ REQUIRED FOR RAILWAY / PROXY */
+app.set("trust proxy", 1);
 
-// Socket.IO setup with CORS
-const io = new SocketIOServer(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+/* =========================
+   ✅ CORS (PRODUCTION SAFE)
+========================= */
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (
+        origin.endsWith(".vercel.app") ||
+        origin === process.env.FRONTEND_URL
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  },
-  transports: ["polling", "websocket"],
-  allowEIO3: true,
-  pingTimeout: 60000,
-  pingInterval: 25000,
-});
+  })
+);
 
-// Setup Socket.IO handlers
-setupSocketIO(io);
+/* ✅ HANDLE PREFLIGHT */
+app.options("*", cors());
 
-// Make io accessible to routes
-app.set("io", io);
-
-// Rate limiting for auth routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  message: { message: "Too many attempts, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// General rate limiter
-const generalLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // limit each IP to 100 requests per minute
-  message: { message: "Too many requests, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Security middleware
+/* =========================
+   SECURITY
+========================= */
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
-// CORS configuration
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
-
-// Request parsing with size limits
+/* =========================
+   BODY PARSERS
+========================= */
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Logging - skip sensitive routes in production
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev", {
-  skip: (req) => req.url.includes("/auth") && process.env.NODE_ENV === "production",
-}));
+/* =========================
+   LOGGING
+========================= */
+app.use(
+  morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
+);
 
-// Input sanitization
-app.use(sanitizeInput);
+/* =========================
+   RATE LIMITING
+========================= */
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-// Apply general rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(generalLimiter);
 
-/* STATIC FILES */
+/* =========================
+   SANITIZATION
+========================= */
+app.use(sanitizeInput);
+
+/* =========================
+   STATIC FILES
+========================= */
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-/* ROUTES */
-// Health check endpoint
+/* =========================
+   SOCKET.IO
+========================= */
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+});
+
+setupSocketIO(io);
+app.set("io", io);
+
+/* =========================
+   ROUTES
+========================= */
 app.get("/health", async (_req, res) => {
   try {
-    // Check database connection
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ 
-      status: "healthy", 
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    });
+    res.json({ status: "healthy" });
   } catch {
-    res.status(503).json({ 
-      status: "unhealthy", 
-      timestamp: new Date().toISOString(),
-    });
+    res.status(503).json({ status: "unhealthy" });
   }
 });
 
 app.get("/", (_req, res) => {
-  res.json({ 
-    message: "Real Estate API", 
-    version: "1.0.0",
-    documentation: "/api-docs",
-  });
+  res.json({ message: "Rentlify API running" });
 });
 
-// Auth routes with rate limiting
+/* AUTH */
 app.use("/auth", authLimiter, authRoutes);
 
-// Public routes
+/* PUBLIC */
 app.use("/applications", applicationRoutes);
 app.use("/properties", propertyRoutes);
 app.use("/leases", leaseRoutes);
 
-// Protected routes
+/* PROTECTED */
 app.use("/tenants", authMiddleware(["tenant"]), tenantRoutes);
 app.use("/managers", authMiddleware(["manager"]), managerRoutes);
 app.use("/messages", authMiddleware(["tenant", "manager"]), messageRoutes);
 
-// Error handling middleware (must be last)
+/* =========================
+   ERROR HANDLING
+========================= */
 app.use(errorHandler);
 
-// 404 handler
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-/* SERVER */
+/* =========================
+   SERVER
+========================= */
 const port = Number(process.env.PORT) || 3002;
+
 server.listen(port, "0.0.0.0", () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 });
 
-/* GRACEFUL SHUTDOWN */
-const gracefulShutdown = async (signal: string) => {
-  console.log(`\n${signal} received. Starting graceful shutdown...`);
-  
-  // Close server
+/* =========================
+   GRACEFUL SHUTDOWN
+========================= */
+const shutdown = async (signal: string) => {
+  console.log(`\n${signal} received. Shutting down...`);
   server.close(async () => {
-    console.log("HTTP server closed");
-    
-    // Close database connection
     await prisma.$disconnect();
-    console.log("Database connection closed");
-    
     process.exit(0);
   });
-  
-  // Force close after 10 seconds
-  setTimeout(() => {
-    console.error("Forcefully shutting down");
-    process.exit(1);
-  }, 10000);
+
+  setTimeout(() => process.exit(1), 10000);
 };
 
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
