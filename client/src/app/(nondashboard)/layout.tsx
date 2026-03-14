@@ -13,6 +13,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!authUser) {
+      setIsLoading(false);
+      return;
+    }
+
     if (authUser) {
       const userRole = authUser.userRole?.toLowerCase();
       if (
@@ -24,7 +31,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(false);
       }
     }
-  }, [authUser, router, pathname]);
+  }, [authLoading, authUser, router, pathname]);
 
   if (authLoading || isLoading) return <>Loading...</>;
 
