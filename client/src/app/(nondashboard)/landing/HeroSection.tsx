@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { setFilters } from "@/state";
 import { FloatingParticles } from "@/components/ui/animated-background";
+import { ThreeHeroBackground } from "@/components/ui/three-hero-background";
 import { Search, MapPin, Sparkles } from "lucide-react";
 
 const HeroSection = () => {
@@ -71,6 +72,7 @@ const HeroSection = () => {
         className="object-cover object-center"
         priority
       />
+      <ThreeHeroBackground className="z-[8] opacity-85" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
       
       {/* Floating particles */}
