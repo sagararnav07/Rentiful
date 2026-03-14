@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Shield, Search, Home } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -99,7 +100,7 @@ const FeatureCard = ({
   linkHref,
   color,
 }: {
-  icon: React.ElementType;
+  icon: LucideIcon;
   imageSrc: string;
   title: string;
   description: string;

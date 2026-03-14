@@ -207,7 +207,7 @@ const Applications = () => {
                     </div>
                   </div>
                 </ApplicationCard>
-              ))}
+              )))}
           </TabsContent>
         ))}
       </Tabs>
